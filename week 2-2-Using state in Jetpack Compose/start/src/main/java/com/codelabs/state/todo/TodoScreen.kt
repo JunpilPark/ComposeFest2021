@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codelabs.state.util.generateRandomTodoItem
@@ -119,6 +120,13 @@ private fun randomTint(): Float {
 @Composable
 fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
     val (text, setText) =  remember { mutableStateOf("") }
+    val (icon, setIcon) =  remember { mutableStateOf(TodoIcon.Default) }
+    val iconVisible = text.isNotBlank()
+    val submit = {
+        onItemComplete(TodoItem(text, icon))
+        setText("")
+        setIcon(TodoIcon.Default)
+    }
     Column {
         Row(
             Modifier
@@ -126,28 +134,40 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
                 .padding(top = 16.dp)
         ) {
             TodoInputTextField(
-                text = text,
                 onTextChange = setText,
-                Modifier
+                text = text,
+                onImeAction = submit,
+                modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp)
             )
             TodoEditButton(
-                onClick = {
-                    onItemComplete(TodoItem(text)) // 이벤트는 상위로 전달된다.
-                    setText("")
-                },
+                onClick = submit,
                 text = "Add",
                 modifier = Modifier.align(Alignment.CenterVertically),
                 enabled = text.isNotBlank() // text 가 비어 있지 않을 때 enable 시킨다.
             )
         }
+        if(iconVisible) {
+            AnimatedIconRow(icon = icon, onIconChange = setIcon)
+        } else {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
 @Composable
-fun TodoInputTextField(text: String, onTextChange: (String) -> Unit, modifier: Modifier) {
-    TodoInputText(text = text, onTextChange = onTextChange, modifier = modifier)
+fun TodoInputTextField(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onImeAction: () -> Unit = {},
+    modifier: Modifier) {
+    TodoInputText(
+        text = text,
+        onTextChange = onTextChange,
+        modifier = modifier,
+        onImeAction = onImeAction
+    )
 }
 
 @Preview
