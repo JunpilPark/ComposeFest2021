@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.codelabs.state.util.generateRandomTodoItem
@@ -54,7 +53,7 @@ fun TodoScreen(
     Column {
 
         TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
-            TodoItemInput(onItemComplete = onAddItem)
+            TodoItemEntryInput(onItemComplete = onAddItem)
         }
 
         LazyColumn(
@@ -118,7 +117,7 @@ private fun randomTint(): Float {
 }
 
 @Composable
-fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
+fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
     val (text, setText) =  remember { mutableStateOf("") }
     val (icon, setIcon) =  remember { mutableStateOf(TodoIcon.Default) }
     val iconVisible = text.isNotBlank()
@@ -127,6 +126,18 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
         setText("")
         setIcon(TodoIcon.Default)
     }
+    TodoItemInput(setText, text, submit, iconVisible, icon, setIcon)
+}
+
+@Composable
+fun TodoItemInput(
+    onTextChange: (String) -> Unit,
+    text: String,
+    submit: () -> Unit,
+    iconVisible: Boolean,
+    icon: TodoIcon,
+    onIconChange: (TodoIcon) -> Unit
+) {
     Column {
         Row(
             Modifier
@@ -134,7 +145,7 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
                 .padding(top = 16.dp)
         ) {
             TodoInputTextField(
-                onTextChange = setText,
+                onTextChange = onTextChange,
                 text = text,
                 onImeAction = submit,
                 modifier = Modifier
@@ -148,8 +159,8 @@ fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
                 enabled = text.isNotBlank() // text 가 비어 있지 않을 때 enable 시킨다.
             )
         }
-        if(iconVisible) {
-            AnimatedIconRow(icon = icon, onIconChange = setIcon)
+        if (iconVisible) {
+            AnimatedIconRow(icon = icon, onIconChange = onIconChange)
         } else {
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -193,4 +204,4 @@ fun PreviewTodoRow() {
 
 @Preview
 @Composable
-fun PreviewTodoItemInput() = TodoItemInput(onItemComplete = { })
+fun PreviewTodoItemInput() = TodoItemEntryInput(onItemComplete = { })
