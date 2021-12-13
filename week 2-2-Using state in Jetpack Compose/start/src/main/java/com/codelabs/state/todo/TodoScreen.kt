@@ -152,7 +152,13 @@ fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
         setText("")
         setIcon(TodoIcon.Default)
     }
-    TodoItemInput(setText, text, submit, iconVisible, icon, setIcon)
+    TodoItemInput(setText, text, submit, iconVisible, icon, setIcon) {
+        TodoEditButton(
+            onClick = submit,
+            text = "Add",
+            enabled = text.isNotBlank() // text 가 비어 있지 않을 때 enable 시킨다.
+        )
+    }
 }
 
 @Composable
@@ -162,7 +168,8 @@ fun TodoItemInput(
     submit: () -> Unit,
     iconVisible: Boolean,
     icon: TodoIcon,
-    onIconChange: (TodoIcon) -> Unit
+    onIconChange: (TodoIcon) -> Unit,
+    buttonSlot: @Composable () -> Unit
 ) {
     Column {
         Row(
@@ -178,12 +185,9 @@ fun TodoItemInput(
                     .weight(1f)
                     .padding(end = 8.dp)
             )
-            TodoEditButton(
-                onClick = submit,
-                text = "Add",
-                modifier = Modifier.align(Alignment.CenterVertically),
-                enabled = text.isNotBlank() // text 가 비어 있지 않을 때 enable 시킨다.
-            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(Modifier.align(Alignment.CenterVertically)) { buttonSlot () }
         }
         if (iconVisible) {
             AnimatedIconRow(icon = icon, onIconChange = onIconChange)
@@ -244,5 +248,24 @@ fun TodoItemInlineEditor(
     icon = item.icon,
     onIconChange = { onEditItemChange(item.copy(icon = it))},
     submit = onEditDone,
-    iconVisible = true
+    iconVisible = true,
+    buttonSlot = {
+        Row {
+            val shrinkButtons = Modifier.widthIn(20.dp)
+            TextButton(onClick = onEditDone, modifier = shrinkButtons) {
+                Text(
+                    text = "\uD83D\uDCBE", // floppy disk
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+            TextButton(onClick = onRemoveItem, modifier = shrinkButtons) {
+                Text(
+                    text = "❌",
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(30.dp)
+                )
+            }
+        }
+    }
 )
